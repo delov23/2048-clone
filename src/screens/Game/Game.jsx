@@ -10,61 +10,72 @@ const Game = () => {
         [0, 0, 0, 0],
     ]);
 
-    const handleKeyPress = (event) => {
-        // Left - 37, Up - 38, Right - 39, Down - 49
-        if (event.keyCode === 37) {
-            handleLeft();
-        }
-    };
-
-    // right?
-    const handleLeft = () => {
-        let success = false;
-
-        for (let row = 0; row < 4; row++) {
-            for (let col = 0; col < 3; col++) {
-                if (board[row][col] === board[row][col + 1]) {
-                    board[row][col] *= 2; 
-                    board[row][col + 1] = 0;
-                    success = true;
-                    col += 1;
-                }
-            }
-        }
-
-        if (success) {
-            generateTile();
-        } else {
-
-        }
-    }
-
-    // const handleUp = () => {
-
-    // }
-
-    // const handleDown = () => {
-
-    // }
-
-    // const handleRight = () => {
-
-    // }
-
-    const generateTile = useCallback(() => {
-        const emptySpaces = board.flatMap((row, rowIndex) => {
-            const validEntries = row.map((col, colIndex) => {
-                if (col === 0) return [rowIndex, colIndex];
-            });
+    const generateTile = useCallback((oldBoard) => {
+        const emptySpaces = oldBoard.flatMap((row, rowIndex) => {
+            const validEntries = row
+                .filter((col) => col === 0)
+                .map((col, colIndex) => [rowIndex, colIndex]);
 
             return validEntries;
         });
 
         const randomSpace =
             emptySpaces[Math.floor(Math.random() * emptySpaces.length)];
-        board[randomSpace[0]][randomSpace[1]] = generateNumber();
-        setBoard([...board]);
-    }, [board]);
+        let newBoard = [...oldBoard];
+        newBoard[randomSpace[0]][randomSpace[1]] = generateNumber();
+        return newBoard;
+    }, []);
+
+    const handleLeft = useCallback(() => {
+        setBoard((previousBoard) => {
+            let newBoard = [];
+
+            for (let row = 0; row < 4; row++) {
+                let withoutZeros = previousBoard[row].filter((number) => number > 0);
+                let resultWithoutZeros = [];
+                console.log('Without zeros', withoutZeros);
+                for (let i = 0; i < withoutZeros.length - 1; i++) {
+                    if (withoutZeros[i] === withoutZeros[i + 1]) {
+                        resultWithoutZeros.push(withoutZeros[i] * 2);
+                        i += 1;
+                    } else {
+                        resultWithoutZeros.push(withoutZeros[i]);
+                    }
+                }
+
+                if (
+                    withoutZeros[withoutZeros.length - 2] !==
+                    withoutZeros[withoutZeros.length - 1]
+                ) {
+                    resultWithoutZeros.push(
+                        withoutZeros[withoutZeros.length - 1]
+                    );
+                }
+
+                let result = [...resultWithoutZeros];
+                for (let i = 0; i < 4 - resultWithoutZeros.length; i++) {
+                    result.push(0);
+                }
+
+                console.log('Result', result);
+
+                newBoard.push(result);
+            }
+
+            const finalBoard = generateTile(newBoard);
+            return finalBoard;
+        });
+    }, [generateTile]);
+
+    const handleKeyPress = useCallback(
+        (event) => {
+            // Left - 37, Up - 38, Right - 39, Down - 49
+            if (event.keyCode === 37) {
+                handleLeft();
+            }
+        },
+        [handleLeft]
+    );
 
     const generateNumber = () => {
         if (Math.random() < 0.7) {
@@ -75,7 +86,8 @@ const Game = () => {
     };
 
     useEffect(() => {
-        generateTile();
+        const newBoard = generateTile(board);
+        setBoard(newBoard);
         document.addEventListener('keydown', handleKeyPress);
 
         return () => {

@@ -6,8 +6,6 @@ import { ThemeContext, LIGHT_THEME } from '../../context/ThemeContext';
 const Header = () => {
     const { theme, toggleTheme } = useContext(ThemeContext);
 
-    console.log(themify(theme, 'header'));
-
     return (
         <div className={styles[themify(theme, 'header')]}>
             <h2 className={styles.logo}>2048</h2>
