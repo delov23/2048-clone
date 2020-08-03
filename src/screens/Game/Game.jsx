@@ -10,20 +10,29 @@ const Game = () => {
         [0, 0, 0, 0],
     ]);
 
+    const [gameOver, setGameOver] = useState(false);
+
     const generateTile = useCallback((oldBoard) => {
         const emptySpaces = oldBoard.flatMap((row, rowIndex) => {
-            const validEntries = row
-                .filter((col) => col === 0)
-                .map((col, colIndex) => [rowIndex, colIndex]);
+            const validEntries = row.reduce((acc, curr, currIndex) => {
+                if (curr === 0) {
+                    return [...acc, [rowIndex, currIndex]];
+                }
+                return acc;
+            }, []);
 
             return validEntries;
         });
 
         const randomSpace =
             emptySpaces[Math.floor(Math.random() * emptySpaces.length)];
-        let newBoard = [...oldBoard];
-        newBoard[randomSpace[0]][randomSpace[1]] = generateNumber();
-        return newBoard;
+        try {
+            oldBoard[randomSpace[0]][randomSpace[1]] = generateNumber();
+        } catch (e) {
+            setGameOver(true);
+        }
+
+        return oldBoard;
     }, []);
 
     const handleLeft = useCallback(() => {
@@ -31,9 +40,10 @@ const Game = () => {
             let newBoard = [];
 
             for (let row = 0; row < 4; row++) {
-                let withoutZeros = previousBoard[row].filter((number) => number > 0);
+                let withoutZeros = previousBoard[row].filter(
+                    (number) => number > 0
+                );
                 let resultWithoutZeros = [];
-                console.log('Without zeros', withoutZeros);
                 for (let i = 0; i < withoutZeros.length - 1; i++) {
                     if (withoutZeros[i] === withoutZeros[i + 1]) {
                         resultWithoutZeros.push(withoutZeros[i] * 2);
@@ -52,29 +62,29 @@ const Game = () => {
                     );
                 }
 
-                let result = [...resultWithoutZeros];
-                for (let i = 0; i < 4 - resultWithoutZeros.length; i++) {
-                    result.push(0);
+                const toLength = 4 - resultWithoutZeros.length;
+                for (let i = 0; i < toLength; i++) {
+                    resultWithoutZeros.push(0);
                 }
 
-                console.log('Result', result);
-
-                newBoard.push(result);
+                newBoard.push(resultWithoutZeros);
             }
 
             const finalBoard = generateTile(newBoard);
             return finalBoard;
         });
-    }, [generateTile]);
+    }, []);
 
     const handleKeyPress = useCallback(
         (event) => {
-            // Left - 37, Up - 38, Right - 39, Down - 49
-            if (event.keyCode === 37) {
-                handleLeft();
+            if (!gameOver) {
+                // Left - 37, Up - 38, Right - 39, Down - 49
+                if (event.keyCode === 37) {
+                    handleLeft();
+                }
             }
         },
-        [handleLeft]
+        [handleLeft, gameOver]
     );
 
     const generateNumber = () => {
@@ -99,6 +109,7 @@ const Game = () => {
         <>
             <Header />
             <Table board={board} />
+            {gameOver && 'Game Over'}
         </>
     );
 };
