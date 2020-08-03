@@ -1,8 +1,31 @@
-.table {
-    border-collapse: collapse;
+.wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
 }
 
-.table,
+.table {
+    width: 25rem;
+    height: 25rem;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: none;
+}
+
+.tableDark {
+    composes: table;
+    background-color: var(--dark-primary);
+}
+
+.tableLight {
+    composes: table;
+    background-color: var(--light-primary);
+}
+
 .cell {
-    border: 1px solid black;
+    padding: 0;
+    border-width: 0;
+    margin: 0;
+    display: table-cell;
 }

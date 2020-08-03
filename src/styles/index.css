@@ -1,6 +1,12 @@
 :root {
   --dark: #333333;
   --light: #f6f6f6;
+  --dark-primary: #4b4b4b;
+  --dark-secondary: #747474;
+  --light-primary: #e7e7e7;
+  --light-secondary: #d3d3d3;
+  --dark-bg: #272727;
+  --light-bg: #ffffff;
 }
 
 * {

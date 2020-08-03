@@ -1,0 +1,19 @@
+.tile {
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    width: 6rem;
+    height: 6rem;
+}
+
+.tileDark {
+    composes: tile;
+    background-color: var(--dark-secondary);
+}
+
+.tileLight {
+    composes: tile;
+    background-color: var(--light-secondary);
+}

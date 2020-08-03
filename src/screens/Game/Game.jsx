@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../../components/Header';
 import Table from '../../components/Table';
+import { LIGHT_THEME, ThemeContext } from '../../context/ThemeContext';
+import { useContext } from 'react';
 
 const Game = () => {
     const [board, setBoard] = useState([
@@ -11,6 +13,7 @@ const Game = () => {
     ]);
     // improve gameOver logic! (when there are no equals next to each other)
     const [gameOver, setGameOver] = useState(false);
+    const { theme } = useContext(ThemeContext);
 
     const generateNumber = useCallback(() => {
         if (Math.random() < 0.7) {
@@ -137,7 +140,7 @@ const Game = () => {
     );
 
     useEffect(() => {
-        const newBoard = generateTile(board);
+        const newBoard = generateTile([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]);
         setBoard(newBoard);
         document.addEventListener('keydown', handleKeyPress);
 
@@ -147,11 +150,11 @@ const Game = () => {
     }, []);
 
     return (
-        <>
+        <div style={{ backgroundColor: theme === LIGHT_THEME ? 'var(--light-bg)' : 'var(--dark-bg)', minHeight: '100vh' }}>
             <Header />
             <Table board={board} />
             {gameOver && 'Game Over'}
-        </>
+        </div>
     );
 };
 
