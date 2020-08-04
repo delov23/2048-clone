@@ -5,12 +5,7 @@ import { LIGHT_THEME, ThemeContext } from '../../context/ThemeContext';
 import { useContext } from 'react';
 
 const Game = () => {
-    const [board, setBoard] = useState([
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-    ]);
+    const [board, setBoard] = useState([]);
     // improve gameOver logic! (when there are no equals next to each other)
     const [gameOver, setGameOver] = useState(false);
     const { theme } = useContext(ThemeContext);
@@ -123,6 +118,57 @@ const Game = () => {
         });
     }, []);
 
+    const handleUp = useCallback(() => {
+        setBoard((previousBoard) => {
+            let newBoard = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ];
+
+            for (let col = 0; col < 4; col++) {
+                let withoutZeros = [];
+                for (let row = 0; row < 4; row++) {
+                    if (previousBoard[row][col] > 0) {
+                        withoutZeros.push(previousBoard[row][col]);
+                    }
+                }
+
+                let resultWithoutZeros = [];
+                for (let i = 0; i < withoutZeros.length - 1; i++) {
+                    if (withoutZeros[i] === withoutZeros[i + 1]) {
+                        resultWithoutZeros.push(withoutZeros[i] * 2);
+                        i += 1;
+                    } else {
+                        resultWithoutZeros.push(withoutZeros[i]);
+                    }
+                }
+
+                if (
+                    withoutZeros[withoutZeros.length - 2] !==
+                    withoutZeros[withoutZeros.length - 1]
+                ) {
+                    resultWithoutZeros.push(
+                        withoutZeros[withoutZeros.length - 1]
+                    );
+                }
+
+                const toLength = 4 - resultWithoutZeros.length;
+                for (let i = 0; i < toLength; i++) {
+                    resultWithoutZeros.push(0);
+                }
+
+                for (let row = 0; row < 4; row++) {
+                    newBoard[row][col] = resultWithoutZeros.shift();
+                }
+            }
+
+            const finalBoard = generateTile(newBoard);
+            return finalBoard;
+        });
+    }, []);
+
     const handleKeyPress = useCallback(
         (event) => {
             if (!gameOver) {
@@ -130,18 +176,26 @@ const Game = () => {
                 if (event.keyCode === 37) {
                     handleLeft();
                 } else if (event.keyCode === 38) {
+                    handleUp();
                 } else if (event.keyCode === 39) {
                     handleRight();
                 } else if (event.keyCode === 40) {
                 }
             }
         },
-        [handleLeft, handleRight, gameOver]
+        [gameOver]
     );
 
     useEffect(() => {
-        const newBoard = generateTile([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]);
+        const newBoard = generateTile([
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+        ]);
+
         setBoard(newBoard);
+
         document.addEventListener('keydown', handleKeyPress);
 
         return () => {
@@ -150,7 +204,15 @@ const Game = () => {
     }, []);
 
     return (
-        <div style={{ backgroundColor: theme === LIGHT_THEME ? 'var(--light-bg)' : 'var(--dark-bg)', minHeight: '100vh' }}>
+        <div
+            style={{
+                backgroundColor:
+                    theme === LIGHT_THEME
+                        ? 'var(--light-bg)'
+                        : 'var(--dark-bg)',
+                minHeight: '100vh',
+            }}
+        >
             <Header />
             <Table board={board} />
             {gameOver && 'Game Over'}
