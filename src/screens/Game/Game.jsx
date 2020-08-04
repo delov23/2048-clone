@@ -3,7 +3,8 @@ import Header from '../../components/Header';
 import Table from '../../components/Table';
 import { LIGHT_THEME, ThemeContext } from '../../context/ThemeContext';
 import { useContext } from 'react';
-import handleDirection from '../../utils/handleDirection';
+import generateTile from '../../utils/generateTile';
+import handleDirection, { DIRECTIONS } from '../../utils/handleDirection';
 
 const Game = () => {
     const [board, setBoard] = useState([]);
@@ -11,168 +12,20 @@ const Game = () => {
     const [gameOver, setGameOver] = useState(false);
     const { theme } = useContext(ThemeContext);
 
-    const generateNumber = useCallback(() => {
-        if (Math.random() < 0.7) {
-            return 2;
-        }
-
-        return 4;
-    }, []);
-
-    const generateTile = useCallback((oldBoard) => {
-        const emptySpaces = oldBoard.flatMap((row, rowIndex) => {
-            const validEntries = row.reduce((acc, curr, currIndex) => {
-                if (curr === 0) {
-                    return [...acc, [rowIndex, currIndex]];
-                }
-                return acc;
-            }, []);
-
-            return validEntries;
-        });
-
-        try {
-            const [rndRow, rndCol] = emptySpaces[
-                Math.floor(Math.random() * emptySpaces.length)
-            ];
-            oldBoard[rndRow][rndCol] = generateNumber();
-        } catch (e) {
-            setGameOver(true);
-        }
-
-        return oldBoard;
-    }, []);
+    const onError = () => {
+        setGameOver(true);
+    };
 
     const handleLeft = useCallback(() => {
-        setBoard((previousBoard) => {
-            let newBoard = [];
-
-            for (let row = 0; row < 4; row++) {
-                let withoutZeros = previousBoard[row].filter(
-                    (number) => number > 0
-                );
-                let resultWithoutZeros = [];
-                for (let i = 0; i < withoutZeros.length - 1; i++) {
-                    if (withoutZeros[i] === withoutZeros[i + 1]) {
-                        resultWithoutZeros.push(withoutZeros[i] * 2);
-                        i += 1;
-                    } else {
-                        resultWithoutZeros.push(withoutZeros[i]);
-                    }
-                }
-
-                if (
-                    withoutZeros[withoutZeros.length - 2] !==
-                    withoutZeros[withoutZeros.length - 1]
-                ) {
-                    resultWithoutZeros.push(
-                        withoutZeros[withoutZeros.length - 1]
-                    );
-                }
-
-                const toLength = 4 - resultWithoutZeros.length;
-                for (let i = 0; i < toLength; i++) {
-                    resultWithoutZeros.push(0);
-                }
-
-                newBoard.push(resultWithoutZeros);
-            }
-
-            const finalBoard = generateTile(newBoard);
-            return finalBoard;
-        });
+        setBoard(handleDirection(DIRECTIONS.LEFT, onError));
     }, []);
 
     const handleRight = useCallback(() => {
-        setBoard((previousBoard) => {
-            let newBoard = [];
-
-            for (let row = 0; row < 4; row++) {
-                let withoutZeros = previousBoard[row].filter(
-                    (number) => number > 0
-                );
-            
-                let resultWithoutZeros = [];
-                for (let i = withoutZeros.length - 1; i > 0; i--) {
-                    if (withoutZeros[i] === withoutZeros[i - 1]) {
-                        resultWithoutZeros.unshift(withoutZeros[i] * 2);
-                        i -= 1;
-                    } else {
-                        resultWithoutZeros.unshift(withoutZeros[i]);
-                    }
-                }
-
-                if (withoutZeros[0] !== withoutZeros[1]) {
-                    resultWithoutZeros.unshift(withoutZeros[0]);
-                }
-
-                const toLength = 4 - resultWithoutZeros.length;
-                for (let i = 0; i < toLength; i++) {
-                    resultWithoutZeros.unshift(0);
-                }
-
-                newBoard.push(resultWithoutZeros);
-            }
-
-            const finalBoard = generateTile(newBoard);
-            return finalBoard;
-        });
+        setBoard(handleDirection(DIRECTIONS.RIGHT, onError));
     }, []);
 
     const handleUp = useCallback(() => {
-        setBoard((previousBoard) => {
-            let newBoard = [
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-            ];
-
-            for (let col = 0; col < 4; col++) {
-                let withoutZeros = [];
-                for (let row = 0; row < 4; row++) {
-                    if (previousBoard[row][col] > 0) {
-                        withoutZeros.push(previousBoard[row][col]);
-                    }
-                }
-
-                let resultWithoutZeros = [];
-                for (let i = 0; i < withoutZeros.length - 1; i++) {
-                    if (withoutZeros[i] === withoutZeros[i + 1]) {
-                        resultWithoutZeros.push(withoutZeros[i] * 2);
-                        withoutZeros[i] = undefined;
-                        withoutZeros[i + 1] = withoutZeros[i] * 2;
-                        i += 1;
-                    } else {
-                        resultWithoutZeros.push(withoutZeros[i]);
-                    }
-
-                }
-
-                if (
-                    withoutZeros[withoutZeros.length - 2] !==
-                    withoutZeros[withoutZeros.length - 1]
-                ) {
-                    resultWithoutZeros.push(
-                        withoutZeros[withoutZeros.length - 1]
-                    );
-                }
-
-                console.log(resultWithoutZeros)
-
-                const toLength = 4 - resultWithoutZeros.length;
-                for (let i = 0; i < toLength; i++) {
-                    resultWithoutZeros.push(0);
-                }
-
-                for (let row = 0; row < 4; row++) {
-                    newBoard[row][col] = resultWithoutZeros.shift();
-                }
-            }
-
-            const finalBoard = generateTile(newBoard);
-            return finalBoard;
-        });
+        setBoard(handleDirection(DIRECTIONS.UP, onError));
     }, []);
 
     const handleKeyPress = useCallback(
@@ -189,7 +42,7 @@ const Game = () => {
                 }
             }
         },
-        [gameOver]
+        [gameOver, handleLeft, handleRight, handleUp]
     );
 
     useEffect(() => {
