@@ -3,6 +3,7 @@ import Header from '../../components/Header';
 import Table from '../../components/Table';
 import { LIGHT_THEME, ThemeContext } from '../../context/ThemeContext';
 import { useContext } from 'react';
+import handleDirection from '../../utils/handleDirection';
 
 const Game = () => {
     const [board, setBoard] = useState([]);
@@ -90,7 +91,7 @@ const Game = () => {
                 let withoutZeros = previousBoard[row].filter(
                     (number) => number > 0
                 );
-
+            
                 let resultWithoutZeros = [];
                 for (let i = withoutZeros.length - 1; i > 0; i--) {
                     if (withoutZeros[i] === withoutZeros[i - 1]) {
@@ -139,10 +140,13 @@ const Game = () => {
                 for (let i = 0; i < withoutZeros.length - 1; i++) {
                     if (withoutZeros[i] === withoutZeros[i + 1]) {
                         resultWithoutZeros.push(withoutZeros[i] * 2);
+                        withoutZeros[i] = undefined;
+                        withoutZeros[i + 1] = withoutZeros[i] * 2;
                         i += 1;
                     } else {
                         resultWithoutZeros.push(withoutZeros[i]);
                     }
+
                 }
 
                 if (
@@ -153,6 +157,8 @@ const Game = () => {
                         withoutZeros[withoutZeros.length - 1]
                     );
                 }
+
+                console.log(resultWithoutZeros)
 
                 const toLength = 4 - resultWithoutZeros.length;
                 for (let i = 0; i < toLength; i++) {

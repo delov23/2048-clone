@@ -6,14 +6,17 @@
     margin: auto;
     width: 6rem;
     height: 6rem;
+    font-weight: 700;
 }
 
 .tileDark {
     composes: tile;
     background-color: var(--dark-secondary);
+    color: var(--light);
 }
 
 .tileLight {
     composes: tile;
     background-color: var(--light-secondary);
+    color: var(--dark)
 }
