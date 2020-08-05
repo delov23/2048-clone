@@ -7,14 +7,15 @@ export const DIRECTIONS = {
     DOWN: 'd',
 };
 
-const mapColToRow = (arr, matrix, col) => {
-    let result = [...matrix];
+const mapColToRow = (resultMatrix, rowArray, colIndex) => {
+    let result = [...resultMatrix];
 
-    for (let row = 0; row < 4; row++) {
-        if (!result[row]) {
-            result[row] = [];
+    for (let i = 0; i < 4; i++) {
+        if (!result[i]) {
+            result[i] = [];
         }
-        result[row][col] = arr.shift();
+
+        result[i][colIndex] = rowArray.shift();
     }
 
     return result;
@@ -25,11 +26,13 @@ const removeZeros = (arr, direction, { previousBoard, col }) => {
         return arr.filter((number) => number > 0);
     } else {
         const result = [];
+        
         for (let row = 0; row < 4; row++) {
             if (previousBoard[row][col] > 0) {
-                result.push(arr[row][col]);
+                result.push(previousBoard[row][col]);
             }
         }
+        
         return result;
     }
 };
@@ -72,23 +75,28 @@ const padZeros = (arr, direction) => {
 const handleDirection = (direction) => (previousBoard, onError) => {
     let newBoard = [];
 
+    const reversed =
+        direction === DIRECTIONS.RIGHT || direction === DIRECTIONS.DOWN;
+    const vertical =
+        direction === DIRECTIONS.UP || direction === DIRECTIONS.DOWN;
+
     for (let i = 0; i < 4; i++) {
         let withoutZeros = removeZeros(previousBoard[i], direction, {
             previousBoard,
-            i,
+            col: i,
         });
-        if (direction === DIRECTIONS.RIGHT || direction === DIRECTIONS.DOWN) {
+        if (reversed) {
             withoutZeros = withoutZeros.reverse();
         }
 
         let resultWithoutZeros = sumAlike(withoutZeros);
-        if (direction === DIRECTIONS.RIGHT || direction === DIRECTIONS.DOWN) {
+        if (reversed) {
             resultWithoutZeros = resultWithoutZeros.reverse();
         }
 
         let result = padZeros(resultWithoutZeros, direction);
-        if (direction === DIRECTIONS.UP || direction === DIRECTIONS.DOWN) {
-            newBoard = mapColToRow(result, newBoard, i);
+        if (vertical) {
+            newBoard = mapColToRow(newBoard, result, i);
         } else {
             newBoard.push(result);
         }

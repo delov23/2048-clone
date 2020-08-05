@@ -28,6 +28,10 @@ const Game = () => {
         setBoard(handleDirection(DIRECTIONS.UP, onError));
     }, []);
 
+    const handleDown = useCallback(() => {
+        setBoard(handleDirection(DIRECTIONS.DOWN, onError));
+    }, [])
+
     const handleKeyPress = useCallback(
         (event) => {
             if (!gameOver) {
@@ -39,10 +43,11 @@ const Game = () => {
                 } else if (event.keyCode === 39) {
                     handleRight();
                 } else if (event.keyCode === 40) {
+                    handleDown();
                 }
             }
         },
-        [gameOver, handleLeft, handleRight, handleUp]
+        [gameOver, handleLeft, handleRight, handleUp, handleDown]
     );
 
     useEffect(() => {
